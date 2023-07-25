@@ -8,6 +8,9 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 // GetUser retrieves all users.
@@ -32,7 +35,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		responses.Error(w, http.StatusBadRequest, err)
 	}
 
-	if err = userModel.Prepare(); err != nil {
+	if err = userModel.Prepare("insert"); err != nil {
 		responses.Error(w, http.StatusBadRequest, err)
 		return
 	}
@@ -54,7 +57,44 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 // UpdateUser updates an existing user.
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Updating user!"))
+	params := mux.Vars(r)
+	ID, err := strconv.ParseInt(params["id"], 10, 64)
+	if err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	bodyRequest, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.Error(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	var userModel models.UserModel
+	if err = json.Unmarshal(bodyRequest, &userModel); err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if err = userModel.Prepare("update"); err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	db, err := database.Connect()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+
+	repository := repositories.NewUsersRepository(db)
+	if err = repository.Update(ID, userModel); err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusNoContent, nil)
 }
 
 // DeleteUser deletes a user.

@@ -20,8 +20,8 @@ type UserModel struct {
 }
 
 // Prepare will call the methods to validate and format the received user
-func (user *UserModel) Prepare() error {
-	if err := user.validate(); err != nil {
+func (user *UserModel) Prepare(actionType string) error {
+	if err := user.validate(actionType); err != nil {
 		return err
 	}
 
@@ -32,7 +32,7 @@ func (user *UserModel) Prepare() error {
 	return nil
 }
 
-func (user *UserModel) validate() error {
+func (user *UserModel) validate(actionType string) error {
 	if user.Name == "" {
 		return errors.New("name is required and cannot be blank")
 	}
@@ -49,7 +49,7 @@ func (user *UserModel) validate() error {
 		return errors.New("the inserted email is invalid")
 	}
 
-	if user.Password == "" {
+	if actionType == "insert" && user.Password == "" {
 		return errors.New("password is required and cannot be blank")
 	}
 

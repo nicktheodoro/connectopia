@@ -42,3 +42,21 @@ func (repository *UsersRepository) Create(user models.UserModel) (uint64, error)
 
 	return uint64(isertedID), nil
 }
+
+// Update updates an user in the database.
+// It takes an ID and a user model as a parameter and returns error (if any).
+func (repository *UsersRepository) Update(ID int64, user models.UserModel) error {
+	statment, err := repository.db.Prepare(
+		"UPDATE users set name = ?, username = ?, email = ? WHERE id = ?",
+	)
+	if err != nil {
+		return err
+	}
+	defer statment.Close()
+
+	if _, err := statment.Exec(user.Name, user.Username, user.Email, ID); err != nil {
+		return err
+	}
+
+	return nil
+}
