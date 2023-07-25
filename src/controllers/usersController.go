@@ -9,18 +9,56 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
 
-// GetUser retrieves all users.
-func GetUsers(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Getting users!"))
+// FindByNameOrUsername find user by name or username.
+func FindByNameOrUsername(w http.ResponseWriter, r *http.Request) {
+	nameOrUsaname := strings.ToLower(r.URL.Query().Get("user"))
+	db, err := database.Connect()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+
+	repository := repositories.NewUsersRepository(db)
+	users, err := repository.FindByNameOrUsername(nameOrUsaname)
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusOK, users)
 }
 
 // GetUserByID retrieves a user by their ID.
 func GetUserByID(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Getting user by ID!"))
+	params := mux.Vars(r)
+
+	userID, err := strconv.ParseUint(params["id"], 10, 64)
+	if err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	db, err := database.Connect()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+
+	repository := repositories.NewUsersRepository(db)
+	usuario, err := repository.GetUserByID(userID)
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusOK, usuario)
 }
 
 // CreateUser handles the creation of a new user.
@@ -99,5 +137,25 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 // DeleteUser deletes a user.
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Deleting user!"))
+	params := mux.Vars(r)
+	ID, err := strconv.ParseInt(params["id"], 10, 64)
+	if err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	db, err := database.Connect()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+
+	repository := repositories.NewUsersRepository(db)
+	if err = repository.Delete(ID); err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusNoContent, nil)
 }

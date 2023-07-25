@@ -9,7 +9,7 @@ var userRoutes = []Route{
 	{
 		URI:         "/users",
 		Method:      http.MethodGet,
-		HandlerFunc: controllers.GetUsers,
+		HandlerFunc: controllers.FindByNameOrUsername,
 		RequireAuth: false,
 	},
 	{

@@ -3,6 +3,7 @@ package repositories
 import (
 	"connectopia-api/src/models"
 	"database/sql"
+	"fmt"
 )
 
 /*
@@ -59,4 +60,95 @@ func (repository *UsersRepository) Update(ID int64, user models.UserModel) error
 	}
 
 	return nil
+}
+
+// Delete deletes an user in the database.
+// It takes an ID as a parameter and returns error (if any).
+func (repository *UsersRepository) Delete(ID int64) error {
+	statment, err := repository.db.Prepare(
+		"DELETE FROM users WHERE id = ?",
+	)
+	if err != nil {
+		return err
+	}
+	defer statment.Close()
+
+	if _, err := statment.Exec(ID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repository UsersRepository) FindByNameOrUsername(nameOrNick string) ([]models.UserModel, error) {
+	nameOrNick = fmt.Sprintf("%%%s%%", nameOrNick)
+
+	results, err := repository.db.Query(
+		`SELECT 
+				id, name, username, email, created_at, updated_at 
+		FROM 
+			users 
+		WHERE 
+			name LIKE ? or username LIKE ?`,
+		nameOrNick, nameOrNick,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer results.Close()
+
+	var users []models.UserModel
+
+	for results.Next() {
+		var user models.UserModel
+
+		if err = results.Scan(
+			&user.ID,
+			&user.Name,
+			&user.Username,
+			&user.Email,
+			&user.CreatedAt,
+			&user.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+
+		users = append(users, user)
+	}
+
+	return users, nil
+}
+
+// BuscarPorID traz um usuário do banco de dados
+func (repository UsersRepository) GetUserByID(ID uint64) (models.UserModel, error) {
+	result, err := repository.db.Query(
+		`SELECT 
+				id, name, username, email, created_at, updated_at 
+		FROM 
+			users 
+		WHERE 
+			id = ?`,
+		ID,
+	)
+	if err != nil {
+		return models.UserModel{}, err
+	}
+	defer result.Close()
+
+	var user models.UserModel
+
+	if result.Next() {
+		if err = result.Scan(
+			&user.ID,
+			&user.Name,
+			&user.Username,
+			&user.Email,
+			&user.CreatedAt,
+			&user.UpdatedAt,
+		); err != nil {
+			return models.UserModel{}, err
+		}
+	}
+
+	return user, nil
 }
