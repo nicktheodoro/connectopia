@@ -180,6 +180,82 @@ func (repository UsersRepository) GetUserByID(ID uint64) (models.UserModel, erro
 	return user, nil
 }
 
+func (repository UsersRepository) GetFollowers(ID uint64) ([]models.UserModel, error) {
+	results, err := repository.db.Query(
+		`SELECT 
+				u.id, u.name, u.username, u.email, u.created_at, u.updated_at 
+		FROM 
+			users u
+			INNER JOIN followers f ON u.id = f.follower_id
+		WHERE
+			f.user_id = ?`,
+		ID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer results.Close()
+
+	var users []models.UserModel
+
+	for results.Next() {
+		var user models.UserModel
+
+		if err = results.Scan(
+			&user.ID,
+			&user.Name,
+			&user.Username,
+			&user.Email,
+			&user.CreatedAt,
+			&user.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+
+		users = append(users, user)
+	}
+
+	return users, nil
+}
+
+func (repository UsersRepository) GetFollowing(ID uint64) ([]models.UserModel, error) {
+	results, err := repository.db.Query(
+		`SELECT 
+				u.id, u.name, u.username, u.email, u.created_at, u.updated_at 
+		FROM 
+			users u
+			INNER JOIN followers f ON u.id = f.user_id
+		WHERE
+			f.follower_id = ?`,
+		ID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer results.Close()
+
+	var users []models.UserModel
+
+	for results.Next() {
+		var user models.UserModel
+
+		if err = results.Scan(
+			&user.ID,
+			&user.Name,
+			&user.Username,
+			&user.Email,
+			&user.CreatedAt,
+			&user.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+
+		users = append(users, user)
+	}
+
+	return users, nil
+}
+
 func (repository UsersRepository) Follow(followedID uint64, followerID uint64) error {
 	statment, err := repository.db.Prepare(
 		"INSERT IGNORE INTO followers (user_id, follower_id) VALUES (?, ?)",
