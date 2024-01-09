@@ -10,10 +10,6 @@ import (
 
 func main() {
 	config.Load()
-
-	fmt.Println(config.Port)
-	fmt.Println("Api running")
-
 	r := router.Generate()
 
 	fmt.Printf("Listening on port %d\n", config.Port)

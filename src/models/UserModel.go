@@ -1,6 +1,7 @@
 package models
 
 import (
+	"connectopia-api/src/security"
 	"errors"
 	"strings"
 	"time"
@@ -25,7 +26,7 @@ func (user *UserModel) Prepare(actionType string) error {
 		return err
 	}
 
-	if err := user.format(); err != nil {
+	if err := user.format(actionType); err != nil {
 		return err
 	}
 
@@ -56,10 +57,19 @@ func (user *UserModel) validate(actionType string) error {
 	return nil
 }
 
-func (user *UserModel) format() error {
+func (user *UserModel) format(actionType string) error {
 	user.Name = strings.TrimSpace(user.Name)
 	user.Username = strings.TrimSpace(user.Username)
 	user.Email = strings.TrimSpace(user.Email)
+
+	if actionType == "insert" {
+		hashedPassword, err := security.Hash(user.Password)
+		if err != nil {
+			return err
+		}
+
+		user.Password = string(hashedPassword)
+	}
 
 	return nil
 }

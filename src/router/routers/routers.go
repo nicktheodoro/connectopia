@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"connectopia-api/src/middlewares"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -15,12 +16,17 @@ type Route struct {
 }
 
 // Configure adds all routes to the router.
-func Configure(router *mux.Router) *mux.Router {
+func Configure(r *mux.Router) *mux.Router {
 	routes := userRoutes
+	routes = append(routes, loginRoute)
 
 	for _, route := range routes {
-		router.HandleFunc(route.URI, route.HandlerFunc).Methods(route.Method)
+		if route.RequireAuth {
+			r.HandleFunc(route.URI, middlewares.Logger(middlewares.Authorize(route.HandlerFunc))).Methods(route.Method)
+		} else {
+			r.HandleFunc(route.URI, middlewares.Logger(route.HandlerFunc)).Methods(route.Method)
+		}
 	}
 
-	return router
+	return r
 }

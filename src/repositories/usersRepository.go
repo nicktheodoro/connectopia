@@ -119,6 +119,33 @@ func (repository UsersRepository) FindByNameOrUsername(nameOrNick string) ([]mod
 	return users, nil
 }
 
+func (repository UsersRepository) FindByEmail(email string) (models.UserModel, error) {
+	result, err := repository.db.Query(
+		`SELECT 
+				id, password 
+		FROM 
+			users 
+		WHERE 
+			email = ?`,
+		email,
+	)
+	if err != nil {
+		return models.UserModel{}, err
+	}
+	defer result.Close()
+
+	var user models.UserModel
+
+	for result.Next() {
+
+		if err = result.Scan(&user.ID, &user.Password); err != nil {
+			return models.UserModel{}, err
+		}
+	}
+
+	return user, nil
+}
+
 // BuscarPorID traz um usuário do banco de dados
 func (repository UsersRepository) GetUserByID(ID uint64) (models.UserModel, error) {
 	result, err := repository.db.Query(

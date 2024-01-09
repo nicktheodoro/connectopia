@@ -10,13 +10,13 @@ var userRoutes = []Route{
 		URI:         "/users",
 		Method:      http.MethodGet,
 		HandlerFunc: controllers.FindByNameOrUsername,
-		RequireAuth: false,
+		RequireAuth: true,
 	},
 	{
 		URI:         "/users/{id}",
 		Method:      http.MethodGet,
 		HandlerFunc: controllers.GetUserByID,
-		RequireAuth: false,
+		RequireAuth: true,
 	},
 	{
 		URI:         "/users",
@@ -28,12 +28,12 @@ var userRoutes = []Route{
 		URI:         "/users/{id}",
 		Method:      http.MethodPut,
 		HandlerFunc: controllers.UpdateUser,
-		RequireAuth: false,
+		RequireAuth: true,
 	},
 	{
 		URI:         "/users/{id}",
 		Method:      http.MethodDelete,
 		HandlerFunc: controllers.DeleteUser,
-		RequireAuth: false,
+		RequireAuth: true,
 	},
 }

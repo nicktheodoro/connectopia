@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"connectopia-api/src/auth"
 	"connectopia-api/src/database"
 	"connectopia-api/src/models"
 	responses "connectopia-api/src/reponses"
 	"connectopia-api/src/repositories"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -102,6 +104,17 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	tokenID, err := auth.GetUserID(r)
+	if err != nil {
+		responses.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	if uint64(ID) != tokenID {
+		responses.Error(w, http.StatusForbidden, errors.New("you don't had access to do this action"))
+		return
+	}
+
 	bodyRequest, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		responses.Error(w, http.StatusUnprocessableEntity, err)
@@ -141,6 +154,17 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	ID, err := strconv.ParseInt(params["id"], 10, 64)
 	if err != nil {
 		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	tokenID, err := auth.GetUserID(r)
+	if err != nil {
+		responses.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	if uint64(ID) != tokenID {
+		responses.Error(w, http.StatusForbidden, errors.New("you don't had access to do this action"))
 		return
 	}
 
