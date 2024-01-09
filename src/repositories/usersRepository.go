@@ -179,3 +179,35 @@ func (repository UsersRepository) GetUserByID(ID uint64) (models.UserModel, erro
 
 	return user, nil
 }
+
+func (repository UsersRepository) Follow(followedID uint64, followerID uint64) error {
+	statment, err := repository.db.Prepare(
+		"INSERT IGNORE INTO followers (user_id, follower_id) VALUES (?, ?)",
+	)
+	if err != nil {
+		return err
+	}
+	defer statment.Close()
+
+	if _, err := statment.Exec(followedID, followerID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repository UsersRepository) Unfollow(unfollowedID uint64, unfollowerID uint64) error {
+	statment, err := repository.db.Prepare(
+		"DELETE FROM followers WHERE user_id = ? AND follower_id = ?",
+	)
+	if err != nil {
+		return err
+	}
+	defer statment.Close()
+
+	if _, err := statment.Exec(unfollowedID, unfollowerID); err != nil {
+		return err
+	}
+
+	return nil
+}
