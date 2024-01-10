@@ -19,6 +19,18 @@ var userRoutes = []Route{
 		RequireAuth: true,
 	},
 	{
+		URI:         "/users/{id}/followers",
+		Method:      http.MethodGet,
+		HandlerFunc: controllers.GetFollowers,
+		RequireAuth: true,
+	},
+	{
+		URI:         "/users/{id}/following",
+		Method:      http.MethodGet,
+		HandlerFunc: controllers.GetFollowing,
+		RequireAuth: true,
+	},
+	{
 		URI:         "/users",
 		Method:      http.MethodPost,
 		HandlerFunc: controllers.CreateUser,
@@ -49,15 +61,9 @@ var userRoutes = []Route{
 		RequireAuth: true,
 	},
 	{
-		URI:         "/users/{id}/followers",
-		Method:      http.MethodGet,
-		HandlerFunc: controllers.GetFollowers,
-		RequireAuth: true,
-	},
-	{
-		URI:         "/users/{id}/following",
-		Method:      http.MethodGet,
-		HandlerFunc: controllers.GetFollowing,
+		URI:         "/users/{id}/update-password",
+		Method:      http.MethodPost,
+		HandlerFunc: controllers.UpdatePassword,
 		RequireAuth: true,
 	},
 }

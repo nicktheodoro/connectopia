@@ -22,6 +22,26 @@ func CreateToken(userID uint64) (string, error) {
 	return token.SignedString(config.SecretKey)
 }
 
+func GetUserID(r *http.Request) (uint64, error) {
+	tokenString := getToken(r)
+	token, err := jwt.Parse(tokenString, getSecretKey)
+	if err != nil {
+		return 0, err
+	}
+
+	if authorisations, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		userID, err := strconv.ParseInt(fmt.Sprintf("%.0f", authorisations["userID"]), 10, 64)
+
+		if err != nil {
+			return 0, err
+		}
+
+		return uint64(userID), err
+	}
+
+	return 0, errors.New("invalid token")
+}
+
 func ValidateToken(r *http.Request) error {
 	tokenString := getToken(r)
 	token, err := jwt.Parse(tokenString, getSecretKey)
@@ -52,24 +72,4 @@ func getSecretKey(token *jwt.Token) (interface{}, error) {
 	}
 
 	return config.SecretKey, nil
-}
-
-func GetUserID(r *http.Request) (uint64, error) {
-	tokenString := getToken(r)
-	token, err := jwt.Parse(tokenString, getSecretKey)
-	if err != nil {
-		return 0, err
-	}
-
-	if authorisations, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		userID, err := strconv.ParseInt(fmt.Sprintf("%.0f", authorisations["userID"]), 10, 64)
-
-		if err != nil {
-			return 0, err
-		}
-
-		return uint64(userID), err
-	}
-
-	return 0, errors.New("invalid token")
 }
