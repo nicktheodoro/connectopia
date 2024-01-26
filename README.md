@@ -24,33 +24,6 @@ The API is designed to demonstrate the implementation of essential features in a
   - Follow and unfollow other users
   - Retrieve followers and following lists
 
-## API Endpoints
-
-- **Users:**
-  - `POST /users` - Create a new user
-  - `POST /login` - Log in and obtain authentication token
-  - `GET /users/{id}` - Retrieve user information by ID
-  - `GET /users/search` - Search users by name or username
-  - `PUT /users/{id}` - Update user profile
-  - `PUT /users/{id}/password` - Update user password
-  - `DELETE /users/{id}` - Delete user account
-  - `GET /users/{id}/followers` - Retrieve followers of a user
-  - `GET /users/{id}/following` - Retrieve users followed by a user
-
-- **Publications:**
-  - `POST /publications` - Create a new publication
-  - `PUT /publications/{id}` - Update a publication
-  - `DELETE /publications/{id}` - Delete a publication
-  - `GET /publications` - Retrieve publications in the user's feed
-  - `GET /publications/{id}` - Retrieve a single publication by ID
-  - `GET /users/{id}/publications` - Retrieve all publications of a specific user
-  - `POST /publications/{id}/like` - Like a publication
-  - `DELETE /publications/{id}/unlike` - Unlike a publication
-
-- **Follow/Unfollow:**
-  - `POST /users/{id}/follow` - Follow a user
-  - `DELETE /users/{id}/unfollow` - Unfollow a user
-
 ## Setup
 
 1. Clone the repository.
